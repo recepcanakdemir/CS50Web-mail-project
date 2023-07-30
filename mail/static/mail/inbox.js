@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('.card-body').addEventListener('click', getOneMail);
   document.querySelector('#archive').addEventListener('click', updateArchiveToArchived);
   document.querySelector('#unarchive').addEventListener('click', updateArchiveToUnarchived);
+  document.querySelector('#reply').addEventListener('click', replyMail);
   // By default, load the inbox
   load_mailbox('inbox');
 
@@ -80,13 +81,13 @@ function displayMailDetails(email){
   }
   document.querySelector('.displayed').setAttribute('id',`${email.id}`);
   const sender = document.querySelector('#sender')
-  sender.innerText = `${email.sender}`
+  sender.innerHTML = ` <div> <span class="fw-bolder"> From: </span> ${email.sender}</div>`
   const recipients = document.querySelector('#recipients')
-  recipients.innerText = `${email.recipients}` 
+  recipients.innerHTML = ` <div> <span class="fw-bolder"> To: </span> ${email.recipients}</div>`
   const subject = document.querySelector('#subject')
-  subject.innerText = `${email.subject}`
+  subject.innerHTML= ` <div> <span class="fw-bolder"> Subject: </span> ${email.subject}</div>`
   const timestamp = document.querySelector('#timestamp')
-  timestamp.innerText = `${email.timestamp}`
+  timestamp.innerHTML= ` <div> <span class="fw-bolder"> Timestamp: </span> ${email.timestamp}</div>`
   const body = document.querySelector('#full-mail');
   body.innerText = `${email.body}`;
 }
@@ -132,6 +133,9 @@ function updateArchiveToArchived(e){
       archived: true
     })
   })
+setTimeout(() => {
+  load_mailbox('inbox');
+  },10);
 }
 function updateArchiveToUnarchived(e){
   e.preventDefault();
@@ -144,6 +148,9 @@ function updateArchiveToUnarchived(e){
       archived:false 
     })
   })
+  setTimeout(() => {
+  load_mailbox('inbox');
+  }, 10);
 }
 //get all the mails
 async function getMails(mailbox){
@@ -152,10 +159,34 @@ async function getMails(mailbox){
   .then(response => response.json())
   displayMails(allEmails,mailbox)
 }
+async function replyMail(e){
+  e.preventDefault();
+
+  // Show compose view and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
+  document.querySelector('#email-detail').style.display = 'none';
+
+
+  const emailID = e.target.closest('.displayed').getAttribute('id');
+  const email = await fetch(`/emails/${emailID}`)
+                .then(response => response.json())
+  console.log(email);
+  const subject = email.subject;
+  // Clear out composition fields
+  document.querySelector('#compose-recipients').value = `${email.sender}`;
+  document.querySelector('#compose-subject').value = `${ subject.charAt(0)+subject.charAt(1)+subject.charAt(2)+' ' === 'Re: ' ? email.subject : 'Re: ' +email.subject } `;
+  document.querySelector('#compose-body').value = `
+  -----------------------------------------------------------
+  On ${email.timestamp}  ${email.sender} wrote: ${email.body}`;
+  
+}
+
 
 //Send Mails
 function sendMail(e){
   e.preventDefault();
+  
   fetch('/emails',{
     method:'POST',
     body: JSON.stringify({
@@ -165,10 +196,20 @@ function sendMail(e){
     })
   })
   .then((response) => response.json())
-  .then( result => {
-    console.log(result);
-  }).catch(error => console.log(error));
+  .catch((error)=>{
+    console.log(error);
+    displayError(error)
+  });
 
-  load_mailbox('inbox');
+
 }
 
+function displayError(error){
+    const error1 = document.querySelector('#error-1');
+    error1.style.display = 'block';
+    error1.innerHTML=
+        `<div  class="alert alert-danger" role="alert">${error.error}</div>`;
+    setTimeout(() => {
+      error1.style.display = 'none';
+    }, 3000);
+}

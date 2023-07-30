@@ -19,41 +19,43 @@
     </div>
     
     <div id="email-detail">
-        <div id="email-detail-inner">
-            <div class="card m-1" style="width: 99.4%; height: 5rem;">
+        <div id="email-detail-inner d-flex ">
+            <div class="m-1" style="width: 99.4%; height: 5rem;">
                 <div>
-                    <p class="p-1" id="sender">${email.sender}</p>
-                    <p class="p-1" id="recipients">${email.recipients}</p>
-                    <p class="p-2" id="subject">${email.subject}</p>
-                    <p class="p-2" id ="timestamp">${email.timestamp}</p>
+                    <div class="d-flex m-2" id="sender"> </div>
+                    <div class="d-flex m-2" id="recipients"></div>
+                    <div class="d-flex m-2" id="subject"></div>
+                    <div class="d-flex m-2" id ="timestamp"></div>
                 </div>
-            </div>
-              <div id="border"></div>
-            <div class = "p-5"id="full-mail">
-                   ${email.body}
-            </div>
-              <div id="reply-archive" class="d-flex displayed ">
-                <button id="reply" class="m-2">Reply</button>
-                <button id="archive"class="m-2">Archive</button>
-                <button id="unarchive"class="m-2">Unarchive</button>
               </div>
-         </div>
-        
+            <br>
+            <br>
+            <br>
+              <div id="reply-archive" class="d-flex displayed">
+            <button id="reply" class="m-1 border-0 p-2 rounded bg-primary text-white fa fa-paper-plane hover-darker"> Reply</button>
+            <button id="archive"class="m-1 border-0 p-2 rounded bg-secondary text-white fa fa-archive"> Archive</button>
+            <button id="unarchive"class="m-1 border-0 p-2 rounded bg-secondary text-white">Unarchive</button>
+              </div>
+              <div class="border m-4"></div>
+            <div class = "m-2"id="full-mail"></div>
+
+        </div>
     </div>
 
     <div id="compose-view">
         <h3>New Email</h3>
+        <div id="error-1"></div>
         <form id="compose-form">
-            <div class="form-group">
+            <div class="form-group m-2">
                 From: <input disabled class="form-control" value="{{ request.user.email }}">
             </div>
-            <div class="form-group">
+            <div class="form-group m-2">
                 To: <input id="compose-recipients" class="form-control">
             </div>
-            <div class="form-group">
+            <div class="form-group m-2">
                 <input class="form-control" id="compose-subject" placeholder="Subject">
             </div>
-            <textarea class="form-control" id="compose-body" placeholder="Body"></textarea>
+            <textarea class="form-control m-2" id="compose-body" placeholder="Body" rows="10" cols="50"></textarea>
             <input type="submit" class="btn btn-primary"/>
         </form>
     </div>
