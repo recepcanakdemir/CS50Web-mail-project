@@ -34,16 +34,17 @@ function load_mailbox(mailbox) {
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#email-detail').style.display = 'none';
-
   // Show the mailbox name
   const emails_view = document.querySelector('#emails-view');
+  emails_view.addEventListener('click', ()=>console.log("sda"));
   if(emails_view.hasChildNodes()){
     emails_view.removeChild(emails_view.firstChild)
   }
   const h3 = document.createElement('h3');
+  h3.className = 'h3-title'
   h3.innerText = `${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}`;
   emails_view.prepend(h3)
-
+ 
 }
 //Display mails
 function displayMails(emails,type){
@@ -72,13 +73,20 @@ function displayMails(emails,type){
 
 //Display Mail Detail
 function displayMailDetails(email){
-  if(email.archived === true){
-    document.querySelector('#archive').style.display = 'none' 
-    document.querySelector('#unarchive').style.display = 'block' 
+  if(email.sender === document.querySelector('.h2-title').innerText){
+      document.querySelector('#unarchive').style.display = 'none' 
+      document.querySelector('#archive').style.display = 'none' 
   }else{
-    document.querySelector('#unarchive').style.display = 'none' 
-    document.querySelector('#archive').style.display = 'block' 
+    if(email.archived === true){
+      document.querySelector('#archive').style.display = 'none' 
+      document.querySelector('#unarchive').style.display = 'block' 
+    }else{
+      document.querySelector('#unarchive').style.display = 'none' 
+      document.querySelector('#archive').style.display = 'block' 
+    }
   }
+
+
   document.querySelector('.displayed').setAttribute('id',`${email.id}`);
   const sender = document.querySelector('#sender')
   sender.innerHTML = ` <div> <span class="fw-bolder"> From: </span> ${email.sender}</div>`
@@ -186,7 +194,7 @@ async function replyMail(e){
 //Send Mails
 function sendMail(e){
   e.preventDefault();
-  
+  try{
   fetch('/emails',{
     method:'POST',
     body: JSON.stringify({
@@ -196,14 +204,24 @@ function sendMail(e){
     })
   })
   .then((response) => response.json())
-  .catch((error)=>{
+  .then( result => {
+    console.log(result)
+    if(Object.keys(result)[0] === 'error'){
+      displayError(result);
+    }
+    else{
+      displaySuccess(result)
+      load_mailbox('sent');
+    }
+  })
+  }catch(error){
     console.log(error);
     displayError(error)
-  });
-
+  };
 
 }
 
+//Display errors
 function displayError(error){
     const error1 = document.querySelector('#error-1');
     error1.style.display = 'block';
@@ -211,5 +229,16 @@ function displayError(error){
         `<div  class="alert alert-danger" role="alert">${error.error}</div>`;
     setTimeout(() => {
       error1.style.display = 'none';
+    }, 3000);
+}
+
+//Display success
+function displaySuccess(success){
+    const success1= document.querySelector('#success-1');
+    success1.style.display = 'block';
+    success1.innerHTML=
+        `<div  class="alert alert-success" role="alert">${success.message}</div>`;
+    setTimeout(() => {
+      success1.style.display = 'none';
     }, 3000);
 }
